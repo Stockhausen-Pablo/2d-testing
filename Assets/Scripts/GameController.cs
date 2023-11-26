@@ -10,25 +10,24 @@ namespace Assets.Scripts
 
     public class GameController : MonoBehaviour
     {
-        private static GameController gameController;
-
         // SerializeField exposes the player controller (script) to the inspector
         [SerializeField] PlayerController playerController;
 
         GameState state;
 
+        public static GameController Instance { get; private set; }
+
         private void Awake()
         {
-            if (gameController == null)
+            if (Instance != null)
             {
-                gameController = this;
-                SceneManager.LoadScene(1);
-                DontDestroyOnLoad(gameObject);
+                Debug.Log("Found more than one GameController in the scene. Destroying the newest one.");
+                Destroy(this.gameObject);
+                return;
             }
-            else if (gameController != this)
-            {
-                Destroy(gameObject);
-            }
+            Instance = this;
+            SceneManager.LoadScene(1);
+            DontDestroyOnLoad(this.gameObject);
         }
 
         private void Start()

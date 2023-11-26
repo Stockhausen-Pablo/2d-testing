@@ -1,10 +1,12 @@
 using Assets.Scripts;
+using Assets.Scripts.DataPersistence;
+using Assets.Scripts.DataPersistence.Data;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : MonoBehaviour, IDataPersistence
 {
     public float moveSpeed = 2;
 
@@ -22,20 +24,21 @@ public class PlayerController : MonoBehaviour
 
     public LayerMask sceneLoaderLayer;
 
-    private static PlayerController playerController;
+    private int playerMoved; // TODO only for data persistence test purpose
+
+    public static PlayerController Instance { get; private set; }
 
     private void Awake()
     {
-        if (playerController == null)
+        if (Instance != null)
         {
-            // when script instance is being loaded (startup)
-            animator = GetComponent<Animator>();
-            playerController = this;
-            DontDestroyOnLoad(gameObject);
-        }else if ( playerController != this)
-        {
-            Destroy(gameObject);
+            Debug.Log("Found more than one PlayerController in the scene. Destroying the newest one.");
+            Destroy(this.gameObject);
+            return;
         }
+        this.animator = GetComponent<Animator>();
+        Instance = this;
+        DontDestroyOnLoad(this.gameObject);
     }
 
     // Start is called before the first frame update
@@ -78,6 +81,8 @@ public class PlayerController : MonoBehaviour
                 if (sceneLoader.isSceneLoader)
                     LoadScene(sceneLoader.collider);
             }
+
+            playerMoved += 1;
         }
 
         animator.SetBool("isMoving", isMoving);
@@ -152,6 +157,16 @@ public class PlayerController : MonoBehaviour
             return false;
         }
         return true;
+    }
+
+    public void LoadData(GameData gameData)
+    {
+        this.playerMoved = gameData.playerMoved;
+    }
+
+    public void SaveData(ref GameData gameData)
+    {
+        gameData.playerMoved = this.playerMoved;
     }
 }
 

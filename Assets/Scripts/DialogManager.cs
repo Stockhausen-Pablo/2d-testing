@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Text;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace Assets.Scripts
@@ -26,24 +23,28 @@ namespace Assets.Scripts
         
         public event Action onHideDialog;
 
-        public static DialogManager Instance {  get; private set; }
+        public static DialogManager _instance;
 
+        public static DialogManager Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    Debug.LogError("DialogManager not instantiated.");
+                }
+
+                return _instance;
+            }
+        }
 
         private void Awake()
         {
             // Any class can use the dialog manager
             // Gets exposed to everything
             // Careful with dependencies!
-            //Instance = this;
-            if (Instance == null)
-            {
-                Instance = this;
-                DontDestroyOnLoad(gameObject);
-            }
-            else if (Instance != this)
-            {
-                Destroy(gameObject);
-            }
+            // Singleton class!
+            _instance = this;
         }
 
         public IEnumerator ShowDialog(Dialog dialog)

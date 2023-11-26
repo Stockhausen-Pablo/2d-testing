@@ -1,25 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Assets.Scripts
 {
     public class CanvasController : MonoBehaviour
     {
-        private static CanvasController canvasController;
+        public static CanvasController Instance { get; private set; }
 
         private void Awake()
         {
-            if (canvasController == null)
+            if (Instance != null)
             {
-                canvasController = this;
-                DontDestroyOnLoad(gameObject);
+                Debug.Log("Found more than one CanvasController in the scene. Destroying the newest one.");
+                Destroy(this.gameObject);
+                return;
             }
-            else if (canvasController != this)
-            {
-                Destroy(gameObject);
-            }
+            Instance = this;
+            DontDestroyOnLoad(this.gameObject);
         }
     }
 }
