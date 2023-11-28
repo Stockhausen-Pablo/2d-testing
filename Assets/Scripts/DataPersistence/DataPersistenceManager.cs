@@ -10,12 +10,18 @@ namespace Assets.Scripts.DataPersistence
 {
     public class DataPersistenceManager : MonoBehaviour
     {
+        [Header("File Storage Config")]
+        [SerializeField] private string fileName;
+
+        [SerializeField] private bool useEncryption;
+
         private GameData gameData;
 
         private List<IDataPersistence> dataPersistenceObjects;
 
-        public static DataPersistenceManager Instance { get; private set; }
+        private FileDataHandler fileDataHandler;
 
+        public static DataPersistenceManager Instance { get; private set; }
 
         private void Awake()
         {
@@ -31,6 +37,7 @@ namespace Assets.Scripts.DataPersistence
 
         private void Start()
         {
+            this.fileDataHandler = new FileDataHandler(Application.persistentDataPath, fileName, useEncryption);
             this.dataPersistenceObjects = FindAllDataPersistenceObjects();
             LoadGame();
         }
@@ -42,7 +49,9 @@ namespace Assets.Scripts.DataPersistence
 
         public void LoadGame()
         {
-            // TODO - Load any saved data from a file using the data handler
+            // load any saved data from a file using the data handler
+            this.gameData = fileDataHandler.Load();
+
             // if no data can be loaded, initialize to a new game
             if (this.gameData == null)
             {
@@ -50,27 +59,23 @@ namespace Assets.Scripts.DataPersistence
                 NewGame();
             }
 
-            // TODO - push the loaded data to all other scripts that need it
+            // push the loaded data to all other scripts that need it
             foreach (IDataPersistence dataPersistenceObj in dataPersistenceObjects)
             {
                 dataPersistenceObj.LoadData(gameData);
             }
-
-            Debug.Log("Loaded player move count = " +  gameData.playerMoved);
-
         }
 
         public void SaveGame()
         {
-            // TODO - pass the data to other scripts so they can update it
+            // pass the data to other scripts so they can update it
             foreach (IDataPersistence dataPersistenceObj in dataPersistenceObjects)
             {
                 dataPersistenceObj.SaveData(ref gameData);
             }
 
-            Debug.Log("Saved player move count = " + gameData.playerMoved);
-
-            // TODO - save that data to a file using the data handler
+            // save that data to a file using the data handler
+            fileDataHandler.Save(gameData);
         }
 
         private void OnApplicationQuit()

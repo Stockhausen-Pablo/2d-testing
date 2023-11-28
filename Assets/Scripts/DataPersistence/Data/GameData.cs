@@ -1,19 +1,24 @@
-﻿using System;
+﻿using Assets.Scripts.DataPersistence.SerializableTypes;
+using System;
 using System.Collections.Generic;
 using System.Text;
+using UnityEngine;
 
 namespace Assets.Scripts.DataPersistence.Data
 {
     [Serializable]
     public class GameData
     {
-        public int playerMoved;
+        public Vector3 playerPos;
+
+        public SerializableDictionary<string, bool> conversations;
 
         // the values defined in this constructor will be the default values
         // the game starts with when there's no data to load
         public GameData()
         {
-            playerMoved = 0;
+            playerPos = Vector3.zero;
+            conversations = new SerializableDictionary<string, bool>();
         }
     }
 }

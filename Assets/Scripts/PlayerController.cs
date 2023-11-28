@@ -24,8 +24,6 @@ public class PlayerController : MonoBehaviour, IDataPersistence
 
     public LayerMask sceneLoaderLayer;
 
-    private int playerMoved; // TODO only for data persistence test purpose
-
     public static PlayerController Instance { get; private set; }
 
     private void Awake()
@@ -81,8 +79,6 @@ public class PlayerController : MonoBehaviour, IDataPersistence
                 if (sceneLoader.isSceneLoader)
                     LoadScene(sceneLoader.collider);
             }
-
-            playerMoved += 1;
         }
 
         animator.SetBool("isMoving", isMoving);
@@ -161,12 +157,12 @@ public class PlayerController : MonoBehaviour, IDataPersistence
 
     public void LoadData(GameData gameData)
     {
-        this.playerMoved = gameData.playerMoved;
+        this.transform.position = gameData.playerPos;
     }
 
     public void SaveData(ref GameData gameData)
     {
-        gameData.playerMoved = this.playerMoved;
+        gameData.playerPos = this.transform.position;
     }
 }
 

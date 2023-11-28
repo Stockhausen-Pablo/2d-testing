@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Assets.Scripts.DataPersistence;
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
@@ -23,28 +24,18 @@ namespace Assets.Scripts
         
         public event Action onHideDialog;
 
-        public static DialogManager _instance;
-
-        public static DialogManager Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    Debug.LogError("DialogManager not instantiated.");
-                }
-
-                return _instance;
-            }
-        }
+        public static DialogManager Instance { get; private set; }
 
         private void Awake()
         {
-            // Any class can use the dialog manager
-            // Gets exposed to everything
-            // Careful with dependencies!
-            // Singleton class!
-            _instance = this;
+            if (Instance != null)
+            {
+                Debug.Log("Found more than one DialogManager in the scene. Destroying the newest one.");
+                Destroy(this.gameObject);
+                return;
+            }
+            Instance = this;
+            DontDestroyOnLoad(this.gameObject);
         }
 
         public IEnumerator ShowDialog(Dialog dialog)
