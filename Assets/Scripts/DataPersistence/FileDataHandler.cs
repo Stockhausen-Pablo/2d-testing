@@ -17,6 +17,8 @@ namespace Assets.Scripts.DataPersistence
 
         private readonly string encryptionCodeWord = "9sU5-z,6DdvuGmDBZwtK";
 
+        private readonly string backupExtension = ".bak";
+
         public FileDataHandler(string dataDirPath, string dataFileName, bool useEncryption)
         {
             this.dataDirPath = dataDirPath;
@@ -24,12 +26,11 @@ namespace Assets.Scripts.DataPersistence
             this.useEncryption = useEncryption;
         }
 
-        public GameData Load(string profileId)
+        public GameData Load(string profileId, bool allowRestoreFromBackup = true)
         {
             // base case - if the profileId is null, return right away
             if (profileId == null)
             {
-                Debug.Log("While loading game data, there was no profileId provided. Not loading any game data.");
                 return null;
             }
 
@@ -50,18 +51,36 @@ namespace Assets.Scripts.DataPersistence
                         }
                     }
 
-                    // optionally decrypt data
+                    // optionally decrypt the data
                     if (useEncryption)
                     {
                         dataToLoad = EncryptDecrypt(dataToLoad);
                     }
 
-                    // deserialize the data from JSON back to the C# object
+                    // deserialize the data from Json back into the C# object
                     loadedData = JsonUtility.FromJson<GameData>(dataToLoad);
-                } 
-                catch (Exception ex)
+                }
+                catch (Exception e)
                 {
-                    Debug.LogError("Error occured when trying to load data from file: " + fullPath + "\n" + ex);
+                    // since we're calling Load(..) recursively, we need to account for the case where
+                    // the rollback succeeds, but data is still failing to load for some other reason,
+                    // which without this check may cause an infinite recursion loop.
+                    if (allowRestoreFromBackup)
+                    {
+                        Debug.LogWarning("Failed to load data file. Attempting to roll back.\n" + e);
+                        bool rollbackSuccess = AttemptRollback(fullPath);
+                        if (rollbackSuccess)
+                        {
+                            // try to load again recursively
+                            loadedData = Load(profileId, false);
+                        }
+                    }
+                    // if we hit this else block, one possibility is that the backup file is also corrupt
+                    else
+                    {
+                        Debug.LogError("Error occured when trying to load file at path: "
+                            + fullPath + " and backup did not work.\n" + e);
+                    }
                 }
             }
             return loadedData;
@@ -72,21 +91,21 @@ namespace Assets.Scripts.DataPersistence
             // base case - if the profileId is null, return right away
             if (profileId == null)
             {
-                Debug.Log("While saving game data, there was no profileId provided. Not loading any game data.");
                 return;
             }
 
             // use Path.Combine to account for different OS's having different path separators
             string fullPath = Path.Combine(dataDirPath, profileId, dataFileName);
+            string backupFilePath = fullPath + backupExtension;
             try
             {
-                // create the directory the file will be written to if it doesn't exist already
+                // create the directory the file will be written to if it doesn't already exist
                 Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
 
-                // serialize the C# game data object into JSON
+                // serialize the C# game data object into Json
                 string dataToStore = JsonUtility.ToJson(data, true);
-                
-                // optionally encrypt data
+
+                // optionally encrypt the data
                 if (useEncryption)
                 {
                     dataToStore = EncryptDecrypt(dataToStore);
@@ -100,12 +119,25 @@ namespace Assets.Scripts.DataPersistence
                         writer.Write(dataToStore);
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                Debug.LogError("Error occured when trying to save data to file: " + fullPath + "\n" + ex);
-            }
 
+                // verify the newly saved file can be loaded successfully
+                GameData verifiedGameData = Load(profileId);
+                // if the data can be verified, back it up
+                if (verifiedGameData != null)
+                {
+                    File.Copy(fullPath, backupFilePath, true);
+                }
+                // otherwise, something went wrong and we should throw an exception
+                else
+                {
+                    throw new Exception("Save file could not be verified and backup could not be created.");
+                }
+
+            }
+            catch (Exception e)
+            {
+                Debug.LogError("Error occured when trying to save data to file: " + fullPath + "\n" + e);
+            }
         }
 
         public void Delete(string profileId)
@@ -218,6 +250,34 @@ namespace Assets.Scripts.DataPersistence
                 modifiedData += (char)(data[i] ^ encryptionCodeWord[i % encryptionCodeWord.Length]);
             }
             return modifiedData;
+        }
+
+        private bool AttemptRollback(string fullPath)
+        {
+            bool success = false;
+            string backupFilePath = fullPath + backupExtension;
+            try
+            {
+                // if the file exists, attempt to roll back to it by overwriting the original file
+                if (File.Exists(backupFilePath))
+                {
+                    File.Copy(backupFilePath, fullPath, true);
+                    success = true;
+                    Debug.LogWarning("Had to roll back to backup file at: " + backupFilePath);
+                }
+                // otherwise, we don't yet have a backup file - so there's nothing to roll back to
+                else
+                {
+                    throw new Exception("Tried to roll back, but no backup file exists to roll back to.");
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogError("Error occured when trying to roll back to backup file at: "
+                    + backupFilePath + "\n" + e);
+            }
+
+            return success;
         }
     }
 }
