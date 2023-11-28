@@ -9,6 +9,8 @@ namespace Assets.Scripts.DataPersistence.Data
     [Serializable]
     public class GameData
     {
+        public long lastUpdated;
+
         public Vector3 playerPos;
 
         public SerializableDictionary<string, bool> conversations;
@@ -19,6 +21,13 @@ namespace Assets.Scripts.DataPersistence.Data
         {
             playerPos = Vector3.zero;
             conversations = new SerializableDictionary<string, bool>();
+        }
+
+        public int GetPercentageComplete()
+        {
+            // TODO - figure out a way to calculate the percentage completed
+            // maybe based on conversations or mini-events
+            return 25;
         }
     }
 }

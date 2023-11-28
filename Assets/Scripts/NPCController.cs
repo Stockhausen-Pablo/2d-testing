@@ -11,7 +11,7 @@ namespace Assets.Scripts
     {
         [SerializeField] Dialog dialog;
 
-        [SerializeField] private string id;
+        [SerializeField] private static string id = "NPC-MainScene-25acc0f30e51";
 
         private bool talkedTo; // Just for testing purpose, persist conversation history
         
@@ -36,7 +36,7 @@ namespace Assets.Scripts
             }
         }
 
-        public void SaveData(ref GameData gameData)
+        public void SaveData(GameData gameData)
         {
             if (gameData.conversations.ContainsKey(id))
             {

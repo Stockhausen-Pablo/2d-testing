@@ -26,7 +26,7 @@ namespace Assets.Scripts
                 return;
             }
             Instance = this;
-            SceneManager.LoadScene(1);
+            SceneManager.LoadSceneAsync("MainScene");
             DontDestroyOnLoad(this.gameObject);
         }
 

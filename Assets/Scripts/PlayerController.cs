@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PlayerController : MonoBehaviour, IDataPersistence
 {
@@ -49,6 +50,16 @@ public class PlayerController : MonoBehaviour, IDataPersistence
     // gets executed on every frame rendered due to MonoBehaviour
     public void HandleUpdate()
     {
+        // below code just used to test exiting the scene,
+        // you probably wouldn't want to actually do this as part of your character controller script.
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            // save the game anytime before loading a new scene
+            DataPersistenceManager.Instance.SaveGame();
+            // load the main menu scene
+            SceneManager.LoadSceneAsync("MainMenu");
+        }
+
         if (!isMoving)
         {
             // if not moving, wait and check for input
@@ -160,7 +171,7 @@ public class PlayerController : MonoBehaviour, IDataPersistence
         this.transform.position = gameData.playerPos;
     }
 
-    public void SaveData(ref GameData gameData)
+    public void SaveData(GameData gameData)
     {
         gameData.playerPos = this.transform.position;
     }

@@ -9,6 +9,6 @@ namespace Assets.Scripts.DataPersistence
     {
         void LoadData(GameData gameData);
 
-        void SaveData(ref GameData gameData);
+        void SaveData(GameData gameData);
     }
 }
