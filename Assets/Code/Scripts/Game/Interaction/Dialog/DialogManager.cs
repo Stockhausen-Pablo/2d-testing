@@ -35,7 +35,6 @@ namespace Assets.Scripts
                 return;
             }
             Instance = this;
-            //DontDestroyOnLoad(this.gameObject);
         }
 
         public IEnumerator ShowDialog(Dialog dialog)

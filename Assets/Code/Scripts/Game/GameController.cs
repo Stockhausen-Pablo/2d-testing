@@ -1,13 +1,9 @@
-﻿using Assets.Scripts.DataPersistence;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Assets.Scripts.SceneLoader;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace Assets.Scripts
 {
-    public enum GameState { FreeRoam, Dialog, MainMenu };
+    public enum GameState { FreeRoam, Dialog };
 
     public class GameController : MonoBehaviour
     {
@@ -15,10 +11,6 @@ namespace Assets.Scripts
         [SerializeField] PlayerController playerController;
 
         GameState state;
-
-        private string sceneToLoad;
-
-        private string currentScene;
 
         public static GameController Instance { get; private set; }
 
@@ -46,20 +38,14 @@ namespace Assets.Scripts
                     state = GameState.FreeRoam;
                 }
             };
-
-            // player controller actions
-            playerController.onGameQuitToMainMenu += () =>
-            {
-                //SceneManager.LoadScene("MainMenu");
-                //state = GameState.MainMenu;
-                SceneController.Instance.LoadMainMenuScene();
-                //DeactivateGameComponents();
-
-            };
         }
 
         private void Update()
-        {
+        {   
+            // Check if controll inputs were executed
+            this.CheckForInputs();
+
+            // handle update based on current state
             switch (state)
             {
                 case GameState.FreeRoam:
@@ -68,24 +54,18 @@ namespace Assets.Scripts
                 case GameState.Dialog:
                     DialogManager.Instance.HandleUpdate();
                     break;
-                case GameState.MainMenu:
-                    break;
                 default:
                     Debug.LogError("No valid game state provided to the game manager");
                     break;
             }
         }
 
-        private void ActivateGameComponents()
+        private void CheckForInputs()
         {
-            playerController.gameObject.SetActive(true);
-            //SceneManager.LoadScene("MainScene");
-        }
-
-        private void DeactivateGameComponents()
-        {
-            playerController.gameObject.SetActive(false);
-            this.gameObject.SetActive(false);
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                SceneController.Instance.LoadMainMenuScene();
+            }
         }
     }
 }

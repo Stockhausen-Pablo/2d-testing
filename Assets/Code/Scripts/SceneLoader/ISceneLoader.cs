@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Assets.Scripts
+﻿namespace Assets.Scripts.SceneLoader
 {
     public interface ISceneLoader
     {

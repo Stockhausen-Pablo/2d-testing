@@ -1,4 +1,5 @@
 ﻿using Assets.Scripts.DataPersistence.SerializableTypes;
+using Assets.Scripts.Static;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -22,7 +23,7 @@ namespace Assets.Scripts.DataPersistence.Data
         public GameData()
         {
             playerPos = Vector3.zero;
-            scene = "MainScene";
+            scene = SceneName.StartScene;
             conversations = new SerializableDictionary<string, bool>();
         }
 

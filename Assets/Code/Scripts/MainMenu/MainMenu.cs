@@ -35,14 +35,12 @@ namespace Assets.Scripts.MainMenu
 
         public void OnNewGameClicked()
         {
-            Debug.Log("New Game clicked");
             saveSlotsMenu.ActivateMenu(false);
             this.DeactivateMenu();
         }
 
         public void OnLoadGameClicked()
         {
-            Debug.Log("Load Game clicked");
             saveSlotsMenu.ActivateMenu(true);
             this.DeactivateMenu();
         }
@@ -51,11 +49,9 @@ namespace Assets.Scripts.MainMenu
         {
             DisableMenuButtons();
             // save the game anytime before loading a new scene
-            DataPersistenceManager.Instance.SaveGame();
+            // DataPersistenceManager.Instance.SaveGame(); WHY?
             // load the next scene - which will in turn load the game because of 
             // OnSceneLoaded() in the DataPersistenceManager
-            // notify the game controller that a new game is being loaded
-            // todo - change to saved scene name
             DataPersistenceManager.Instance.LoadPersistedScene();
         }
 

@@ -71,7 +71,7 @@ namespace Assets.Scripts.MainMenu
             // save the game anytime before loading a new scene
             DataPersistenceManager.Instance.SaveGame();
             // load the scene
-            SceneManager.LoadSceneAsync("MainScene");
+            DataPersistenceManager.Instance.LoadPersistedScene();
         }
 
         public void OnClearClicked(SaveSlot saveSlot)

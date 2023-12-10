@@ -1797,7 +1797,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 890350193}
         m_TargetAssemblyTypeName: Assets.Scripts.MainMenu.MainMenu, Assembly-CSharp
-        m_MethodName: onNewGameClicked
+        m_MethodName: OnNewGameClicked
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

@@ -1,11 +1,10 @@
 ﻿using Assets.Scripts.DataPersistence.Data;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using UnityEngine;
 using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine.SceneManagement;
+using Assets.Scripts.SceneLoader;
 
 namespace Assets.Scripts.DataPersistence
 {
@@ -73,9 +72,7 @@ namespace Assets.Scripts.DataPersistence
 
         public void LoadPersistedScene()
         {
-            //onGameLoad?.Invoke("MainScene");
-            // use real scene
-            SceneController.Instance.LoadSceneControlled("MainScene");
+            onGameLoad?.Invoke(this.gameData.scene);
         }
 
         private void InitializeSelectedProfileId()

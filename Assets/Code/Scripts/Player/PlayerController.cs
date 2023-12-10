@@ -1,11 +1,9 @@
 using Assets.Scripts;
 using Assets.Scripts.DataPersistence;
 using Assets.Scripts.DataPersistence.Data;
-using System;
+using Assets.Scripts.SceneLoader;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class PlayerController : MonoBehaviour, IDataPersistence
 {
@@ -25,8 +23,6 @@ public class PlayerController : MonoBehaviour, IDataPersistence
 
     public LayerMask sceneLoaderLayer;
 
-    public event Action onGameQuitToMainMenu;
-
     public static PlayerController Instance { get; private set; }
 
     private void Awake()
@@ -39,28 +35,12 @@ public class PlayerController : MonoBehaviour, IDataPersistence
         }
         this.animator = GetComponent<Animator>();
         Instance = this;
-        //DontDestroyOnLoad(this.gameObject);
-    }
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        //StartCoroutine(Move(Vector3.zero));
     }
 
     // Update is called once per frame
     // gets executed on every frame rendered due to MonoBehaviour
     public void HandleUpdate()
     {
-        // below code just used to test exiting the scene,
-        // you probably wouldn't want to actually do this as part of your character controller script.
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            onGameQuitToMainMenu?.Invoke();
-            //SceneManager.LoadScene("MainMenu");
-            //this.gameObject.SetActive(false);
-        }
-
         if (!isMoving)
         {
             // if not moving, wait and check for input

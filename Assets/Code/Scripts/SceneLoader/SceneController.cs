@@ -1,22 +1,25 @@
 using Assets.Scripts.DataPersistence;
+using Assets.Scripts.DataPersistence.Data;
+using Assets.Scripts.Static;
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Text;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace Assets.Scripts
+namespace Assets.Scripts.SceneLoader
 {
     public enum SceneState { Loading, Loaded, MainMenu };
 
-    public class SceneController : MonoBehaviour
+    public class SceneController : MonoBehaviour, IDataPersistence
     {
         SceneState state = SceneState.MainMenu;
 
-        private string sceneToLoad = "MainMenu";
+        private string sceneToLoad = SceneName.MainMenu;
 
-        private string currentScene = "MainMenu";
+        private string currentScene = SceneName.MainMenu;
+
+        private string sceneToSave = SceneName.StartScene;
 
         private AsyncOperation _asyncOperation;
 
@@ -39,52 +42,44 @@ namespace Assets.Scripts
             // data persistence actions
             DataPersistenceManager.Instance.onGameLoad += (string scene) =>
             {
-                Debug.Log("Scene controller noticed onGameLoad");
-                this.sceneToLoad = scene;
-                //SceneManager.LoadScene("GameScene");
-                //SceneManager.LoadScene(scene);
-                //ActivateGameComponents();;
-                state = SceneState.Loading;
+                this.LoadSceneControlled(scene);
             };
 
         }
 
         private void Update()
         {
-            switch (state)
+            // handle attempts to load a one scene multiple times
+            if (String.Equals(this.currentScene, sceneToLoad))
             {
-                case SceneState.Loading:
-                    // handle attempts to load a one scene multiple times
-                    if (String.Equals(this.currentScene, sceneToLoad))
-                    {
-                        Debug.LogError("Tried to load the current scene again");
+                return;
+            }
+            else if (!String.Equals(this.currentScene, sceneToLoad))
+            {
+                switch (state)
+                {
+                    case SceneState.Loading:
+                        // load scene
+                        this.StartCoroutine(this.LoadSceneAsyncProcess(sceneName: this.sceneToLoad));
+                        // update scene controller states
+                        this.currentScene = sceneToLoad;
+                        this.state = SceneState.Loaded;
                         break;
-                    }
-                    // load scene
-                    this.StartCoroutine(this.LoadSceneAsyncProcess(sceneName: this.sceneToLoad));
-                    // update scene controller fields
-                    this.currentScene = sceneToLoad;
-                    this.state = SceneState.Loaded;
-                    break;
-                case SceneState.Loaded:
-                    // scene is loaded - nothing has to be done
-                    break;
-                case SceneState.MainMenu:
-                    if (String.Equals(this.currentScene, sceneToLoad))
-                    {
+                    case SceneState.Loaded:
+                        // scene is loaded - nothing has to be done
                         break;
-                    }
-                    // save the game anytime before loading a new scene
-                    DataPersistenceManager.Instance.SaveGame();
-                    // deactivate game components
-                    //DeactivateGameComponents();
-                    // load the main menu scene
-                    SceneManager.LoadSceneAsync(sceneToLoad, LoadSceneMode.Single);
-                    this.currentScene = sceneToLoad;
-                    break;
-                default:
-                    Debug.LogError("No valid scene state provided to the scene controller");
-                    break;
+                    case SceneState.MainMenu:
+                        // save the game anytime before loading a new scene
+                        DataPersistenceManager.Instance.SaveGame();
+                        // load the main menu scene
+                        //SceneManager.LoadSceneAsync(sceneToLoad, LoadSceneMode.Single);
+                        this.StartCoroutine(this.LoadSceneAsyncProcess(sceneName: this.sceneToLoad));
+                        this.currentScene = sceneToLoad;
+                        break;
+                    default:
+                        Debug.LogError("No valid scene state provided to the scene controller");
+                        break;
+                }
             }
         }
 
@@ -107,7 +102,8 @@ namespace Assets.Scripts
 
         public void LoadMainMenuScene()
         {
-            this.sceneToLoad = "MainMenu";
+            this.sceneToLoad = SceneName.MainMenu;
+            this.sceneToSave = this.currentScene;
             this.state = SceneState.MainMenu;   
         }
 
@@ -115,6 +111,17 @@ namespace Assets.Scripts
         {
             this.sceneToLoad = scene;
             this.state = SceneState.Loading;
+        }
+
+        public void LoadData(GameData gameData)
+        {
+            //this.LoadSceneControlled(gameData.scene);
+            return;
+        }
+
+        public void SaveData(GameData gameData)
+        {
+            gameData.scene = this.sceneToSave;
         }
     }
 }
